@@ -1,4 +1,4 @@
-[![Nuget](https://img.shields.io/nuget/v/Nickvision.Aura)](https://www.nuget.org/packages/Nickvision.FlatpakGenerator/)
+[![Nuget](https://img.shields.io/nuget/v/Nickvision.FlatpakGenerator)](https://www.nuget.org/packages/Nickvision.FlatpakGenerator/)
 
 # Nickvision.FlatpakGenerator
 
@@ -19,4 +19,4 @@ Example:
 Run `flatpak-dotnet-generator --help` to see full list of options.
 
 # Installation
-<a href='https://www.nuget.org/packages/Nickvision.GirExt/'><img width='140' alt='Download on Nuget' src='https://www.nuget.org/Content/gallery/img/logo-header.svg'/></a>
+<a href='https://www.nuget.org/packages/Nickvision.FlatpakGenerator/'><img width='140' alt='Download on Nuget' src='https://www.nuget.org/Content/gallery/img/logo-header.svg'/></a>
