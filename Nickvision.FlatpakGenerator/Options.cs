@@ -9,7 +9,8 @@ namespace Nickvision.FlatpakGenerator;
 /// <summary>
 /// Command-line options
 /// </summary>
-internal class Options {
+internal class Options 
+{
     /// <summary>
     /// Name of CSPROJ file to create sources for
     /// </summary>
