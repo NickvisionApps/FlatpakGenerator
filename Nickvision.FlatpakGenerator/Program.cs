@@ -106,8 +106,9 @@ public class Program
     /// <returns>Data for the package</returns>
     private async Task<Dictionary<string, string>> GetPackageAsync(string name, string destDir)
     {
+        name = name.ToLower();
         using var httpClient = new HttpClient();
-        var regResponse = await httpClient.GetAsync($"https://api.nuget.org/v3/registration5-semver1/{name.ToLower()}/index.json");
+        var regResponse = await httpClient.GetAsync($"https://api.nuget.org/v3/registration5-semver1/{name}/index.json");
         var regObj = JsonSerializer.Deserialize<JsonObject>(await regResponse.Content.ReadAsStringAsync())!;
         var catalogUrl = ((regObj["items"] as JsonArray)![^1]!["items"] as JsonArray)![^1]!["catalogEntry"]!["@id"]!.ToString();
         var catResponse = await httpClient.GetAsync(catalogUrl);
