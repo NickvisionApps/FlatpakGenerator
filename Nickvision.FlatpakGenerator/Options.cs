@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-
 using CommandLine;
+using System.Collections.Generic;
 
 namespace Nickvision.FlatpakGenerator;
 
