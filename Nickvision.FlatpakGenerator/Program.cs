@@ -13,16 +13,27 @@ namespace Nickvision.FlatpakGenerator;
 
 public class Program
 {
-    public static void Main(string[] args) => new Program(args);
+    public static async Task Main(string[] args) => await new Program().RunAsync(args);
     
-    private Program(string[] args)
+    /// <summary>
+    /// Construct Program
+    /// </summary>
+    private Program()
     {
-        Parser.Default.ParseArguments<Options>(args)
-            .WithParsed(o =>
+    }
+
+    /// <summary>
+    /// Run the program
+    /// </summary>
+    /// <param name="args">Command-line arguments</param>
+    private async Task RunAsync(string[] args)
+    {
+        await Parser.Default.ParseArguments<Options>(args)
+            .WithParsedAsync(async o =>
             {
                 var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir);
                 var addPackages = o.AdditionalPackages.ToList();
-                if (o.SelfContained)
+                if (o.SelfContained == true)
                 {
                     addPackages.Add("microsoft.aspnetcore.app.runtime.linux-arm");
                     addPackages.Add("microsoft.aspnetcore.app.runtime.linux-arm64");
@@ -33,11 +44,9 @@ public class Program
                 }
                 foreach (var pkg in addPackages)
                 {
-                    var task = GetPackage(pkg, o.DestDir);
-                    task.Wait();
-                    sources.Add(task.Result);
+                    sources.Add(await GetPackageAsync(pkg, o.DestDir));
                 }
-                File.WriteAllText(o.OutputFile, JsonSerializer.Serialize(sources, new JsonSerializerOptions { WriteIndented = true }));
+                await File.WriteAllTextAsync(o.OutputFile, JsonSerializer.Serialize(sources, new JsonSerializerOptions { WriteIndented = true }));
                 Console.WriteLine($"Sources are written to file \"{o.OutputFile}\"");
             });
     }
@@ -95,7 +104,7 @@ public class Program
     /// <param name="name">Package name</param>
     /// <param name="destDir">Destination directory for sources</param>
     /// <returns>Data for the package</returns>
-    private async Task<Dictionary<string, string>> GetPackage(string name, string destDir)
+    private async Task<Dictionary<string, string>> GetPackageAsync(string name, string destDir)
     {
         using var httpClient = new HttpClient();
         var regResponse = await httpClient.GetAsync($"https://api.nuget.org/v3/registration5-semver1/{name.ToLower()}/index.json");
