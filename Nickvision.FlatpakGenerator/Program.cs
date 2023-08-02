@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -95,6 +96,7 @@ public class Program
             });
         }
         Directory.Delete(tempDir, true);
+        result.Sort((a, b) => a["dest-filename"].CompareTo(b["dest-filename"]));
         return result;
     }
     
