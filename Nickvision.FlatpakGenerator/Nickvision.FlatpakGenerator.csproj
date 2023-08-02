@@ -5,7 +5,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <PackageId>Nickvision.FlatpakGenerator</PackageId>
-    <Version>2023.7.0</Version>
+    <Version>2023.8.0</Version>
     <Company>Nickvision</Company>
     <Authors>Nickvision</Authors>
     <Description>A tool to generate Flatpak sources file for a C# project</Description>
