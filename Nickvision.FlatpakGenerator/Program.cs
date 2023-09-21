@@ -33,7 +33,7 @@ public class Program
             {
                 var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir, o.RunAsUser);
                 var addPackages = o.AdditionalPackages.ToList();
-                if (o.SelfContained)
+                if (o.SelfContained == true)
                 {
                     addPackages.Add("microsoft.aspnetcore.app.runtime.linux-arm");
                     addPackages.Add("microsoft.aspnetcore.app.runtime.linux-arm64");

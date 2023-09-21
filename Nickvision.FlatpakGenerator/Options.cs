@@ -34,7 +34,7 @@ internal class Options
     /// Whether to download runtime packages required to build self-contained apps
     /// </summary>
     [Option('s', "self-contained", Required = false, Default = true, HelpText = "Add runtime packages required to build self-contained apps.")]
-    public bool SelfContained { get; set; }
+    public bool? SelfContained { get; set; }
     /// <summary>
     /// Whether to download runtime packages required to build self-contained apps
     /// </summary>
