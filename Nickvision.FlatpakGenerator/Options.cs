@@ -34,12 +34,12 @@ internal class Options
     /// Whether to download runtime packages required to build self-contained apps
     /// </summary>
     [Option('s', "self-contained", Required = false, Default = true, HelpText = "Add runtime packages required to build self-contained apps.")]
-    public bool? SelfContained { get; set; }
+    public bool SelfContained { get; set; }
     /// <summary>
     /// Whether to download runtime packages required to build self-contained apps
     /// </summary>
-    [Option('u', "user", Required = false, Default = false, HelpText = "Run flatpak in user mode.")]
-    public bool? RunAsUser { get; set; }
+    [Option('u', "user", Required = false, HelpText = "Run flatpak in user mode.")]
+    public bool RunAsUser { get; set; }
     /// <summary>
     /// Space-separated list of additional packages to download (only latest versions)
     /// </summary>

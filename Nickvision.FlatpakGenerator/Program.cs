@@ -31,9 +31,9 @@ public class Program
         await Parser.Default.ParseArguments<Options>(args)
             .WithParsedAsync(async o =>
             {
-                var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir, o.RunAsUser == true);
+                var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir, o.RunAsUser);
                 var addPackages = o.AdditionalPackages.ToList();
-                if (o.SelfContained == true)
+                if (o.SelfContained)
                 {
                     addPackages.Add("microsoft.aspnetcore.app.runtime.linux-arm");
                     addPackages.Add("microsoft.aspnetcore.app.runtime.linux-arm64");
