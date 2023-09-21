@@ -31,7 +31,7 @@ public class Program
         await Parser.Default.ParseArguments<Options>(args)
             .WithParsedAsync(async o =>
             {
-                var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir, o.RunAsUser ?? false);
+                var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir, o.RunAsUser == true);
                 var addPackages = o.AdditionalPackages.ToList();
                 if (o.SelfContained == true)
                 {
@@ -77,6 +77,7 @@ public class Program
         };
         if(runAsUser)
         {
+            Console.WriteLine("Flatpak running in user mode");
             process.StartInfo.ArgumentList.Insert(1, "--user");
         }
         process.Start();
