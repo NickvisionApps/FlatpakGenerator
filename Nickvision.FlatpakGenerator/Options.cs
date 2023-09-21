@@ -31,10 +31,10 @@ internal class Options
     [Option('t', "temp-dir", Required = false, Default = "./FlatpakGeneratorPackages", HelpText = "Temporary directory to store packages (will be automatically removed after the process ends).")]
     public string TempDir { get; set; }
     /// <summary>
-    /// Whether to download runtime packages required to build self-contained apps
+    /// Whether to NOT download runtime packages required to build self-contained apps
     /// </summary>
-    [Option('s', "self-contained", Required = false, Default = true, HelpText = "Add runtime packages required to build self-contained apps.")]
-    public bool? SelfContained { get; set; }
+    [Option("no-self-contained", Required = false, HelpText = "Add runtime packages required to build self-contained apps.")]
+    public bool NoSelfContained { get; set; }
     /// <summary>
     /// Whether to download runtime packages required to build self-contained apps
     /// </summary>
