@@ -38,7 +38,7 @@ internal class Options
     /// <summary>
     /// Whether to download runtime packages required to build self-contained apps
     /// </summary>
-    [Option('u', "run-as-user", Required = false, Default = false, HelpText = "Run flatpak in user mode.")]
+    [Option('u', "user", Required = false, Default = false, HelpText = "Run flatpak in user mode.")]
     public bool? RunAsUser { get; set; }
     /// <summary>
     /// Space-separated list of additional packages to download (only latest versions)
