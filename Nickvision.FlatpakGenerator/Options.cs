@@ -36,6 +36,11 @@ internal class Options
     [Option('s', "self-contained", Required = false, Default = true, HelpText = "Add runtime packages required to build self-contained apps.")]
     public bool? SelfContained { get; set; }
     /// <summary>
+    /// Whether to download runtime packages required to build self-contained apps
+    /// </summary>
+    [Option('u', "run-as-user", Required = false, Default = false, HelpText = "Run flatpak in user mode.")]
+    public bool? RunAsUser { get; set; }
+    /// <summary>
     /// Space-separated list of additional packages to download (only latest versions)
     /// </summary>
     [Option('a', "add-packages", Required = false, HelpText = "Additional packages list, latest versions will be downloaded automatically.")]

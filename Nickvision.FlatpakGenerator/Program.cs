@@ -31,7 +31,7 @@ public class Program
         await Parser.Default.ParseArguments<Options>(args)
             .WithParsedAsync(async o =>
             {
-                var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir);
+                var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir, o.RunAsUser ?? false);
                 var addPackages = o.AdditionalPackages.ToList();
                 if (o.SelfContained == true)
                 {
@@ -57,8 +57,9 @@ public class Program
     /// <param name="inputFile">CSPROJ file</param>
     /// <param name="destDir">Destination directory for sources</param>
     /// <param name="tempDir">Temporary directory to restore packages to get data</param>
+    /// <param name="runAsUser">Whether or not to run flatpak in user mode</param>
     /// <returns>List with packages data</returns>
-    private List<Dictionary<string, string>> GenerateSourcesFromProject(string inputFile, string destDir, string tempDir)
+    private List<Dictionary<string, string>> GenerateSourcesFromProject(string inputFile, string destDir, string tempDir, bool runAsUser)
     {
         var process = new Process
         {
@@ -74,6 +75,10 @@ public class Program
                 UseShellExecute = false
             }
         };
+        if(runAsUser)
+        {
+            process.StartInfo.ArgumentList.Insert(1, "--user");
+        }
         process.Start();
         process.WaitForExit();
         var result = new List<Dictionary<string, string>>();
