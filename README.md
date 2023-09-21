@@ -9,7 +9,7 @@
  This tool is a replacement for [flatpak-dotnet-generator](https://github.com/flatpak/flatpak-builder-tools/tree/master/dotnet) python script, with some changes:
  1. Written in C# (obviously)
  2. Latest version of Freedesktop SDK and Dotnet are used
- 3. Runtime packages required to build self-contained programs get added automatically (can be disabled with `-s false`)
+ 3. Runtime packages required to build self-contained programs get added automatically (can be disabled with `--no-self-contained`)
  4. You can set additional packages to add with `-a` option
 
 Example:
