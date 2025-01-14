@@ -68,8 +68,8 @@ public class Program
                 FileName = "flatpak",
                 ArgumentList = { "run",
                         "--env=DOTNET_CLI_TELEMETRY_OPTOUT=true", "--env=DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true",
-                        "--command=sh", "--runtime=org.freedesktop.Sdk//24.08", "--share=network", "--filesystem=host", "org.freedesktop.Sdk.Extension.dotnet8//24.08", "-c",
-                        "PATH=\"${PATH}:/usr/lib/sdk/dotnet8/bin\" LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:/usr/lib/sdk/dotnet8/lib\" exec dotnet restore \"$@\"",
+                        "--command=sh", "--runtime=org.freedesktop.Sdk//24.08", "--share=network", "--filesystem=host", "org.freedesktop.Sdk.Extension.dotnet9//24.08", "-c",
+                        "PATH=\"${PATH}:/usr/lib/sdk/dotnet9/bin\" LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:/usr/lib/sdk/dotnet9/lib\" exec dotnet restore \"$@\"",
                         "--", "--packages", tempDir, inputFile
                 },
                 UseShellExecute = false
