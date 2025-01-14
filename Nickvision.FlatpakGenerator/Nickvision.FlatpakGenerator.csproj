@@ -11,7 +11,7 @@
     <Description>A tool to generate Flatpak sources file for a C# project</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>(c) Nickvision 2021-2025/Copyright>
+    <Copyright>(c) Nickvision 2021-2025</Copyright>
     <PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
     <RepositoryUrl>https://github.com/NickvisionApps/FlatpakGenerator</RepositoryUrl>
     <PackageReleaseNotes>- Update to .NET 9</PackageReleaseNotes>
