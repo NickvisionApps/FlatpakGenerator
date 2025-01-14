@@ -10,12 +10,12 @@ permissions:
     id-token: write
     contents: read
 jobs:
-    mpvsharp:
-        name: "Build Nickvision.FlatpakGenerator"
+    build:
+        name: "Build"
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                dotnet-version: [ '8.0.x' ]
+                dotnet-version: [ '9.0.x' ]
         steps:
             - uses: actions/checkout@v3
             - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -26,3 +26,10 @@ jobs:
               run: dotnet restore Nickvision.FlatpakGenerator/Nickvision.FlatpakGenerator.csproj
             - name: Build
               run: dotnet build Nickvision.FlatpakGenerator/Nickvision.FlatpakGenerator.csproj --configuration Release --no-restore
+            - name: Pack
+              run: dotnet pack Nickvision.FlatpakGenerator/Nickvision.FlatpakGenerator.csproj --output ${{github.workspace}}/nuget
+            - name: Upload
+              uses: actions/upload-artifact@v4
+              with:
+                  path: ${{github.workspace}}/nuget
+                  name: Nuget
