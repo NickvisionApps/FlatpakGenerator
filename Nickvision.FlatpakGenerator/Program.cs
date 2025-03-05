@@ -115,8 +115,20 @@ public class Program
     {
         name = name.ToLower();
         using var httpClient = new HttpClient();
-        var regResponse = await httpClient.GetAsync($"https://api.nuget.org/v3/registration5-semver1/{name}/index.json");
-        var regObj = JsonSerializer.Deserialize<JsonObject>(await regResponse.Content.ReadAsStringAsync())!;
+        JsonObject regObj;
+        try
+        {
+            var regResponse = await httpClient.GetAsync($"https://api.nuget.org/v3/registration5-semver1/{name}/index.json");
+            var s = await regResponse.Content.ReadAsStringAsync();
+            regObj = JsonSerializer.Deserialize<JsonObject>(s)!;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            Console.WriteLine("Failed to get package data for " + name);
+            Environment.Exit(1);
+            return null!;
+        }
         string catalogUrl;
         try
         {
