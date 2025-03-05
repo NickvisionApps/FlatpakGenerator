@@ -117,7 +117,28 @@ public class Program
         using var httpClient = new HttpClient();
         var regResponse = await httpClient.GetAsync($"https://api.nuget.org/v3/registration5-semver1/{name}/index.json");
         var regObj = JsonSerializer.Deserialize<JsonObject>(await regResponse.Content.ReadAsStringAsync())!;
-        var catalogUrl = ((regObj["items"] as JsonArray)![^1]!["items"] as JsonArray)![^1]!["catalogEntry"]!["@id"]!.ToString();
+        string catalogUrl;
+        try
+        {
+            catalogUrl = ((regObj["items"] as JsonArray)![^1]!["items"] as JsonArray)![^1]!["catalogEntry"]!["@id"]!.ToString();
+        }
+        catch
+        {
+            try
+            {
+                var detailedResponseUrl = (regObj["items"] as JsonArray)![^1]!["@id"]!.ToString();
+                var detailedResponse = await httpClient.GetAsync(detailedResponseUrl);
+                var detailedResponseObj = JsonSerializer.Deserialize<JsonObject>(await detailedResponse.Content.ReadAsStringAsync())!;
+                catalogUrl = (detailedResponseObj["items"] as JsonArray)![^1]!["catalogEntry"]!["@id"]!.ToString();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine("Failed to parse catalog url for " + name);
+                Environment.Exit(1);
+                return null!;
+            }
+        }
         var catResponse = await httpClient.GetAsync(catalogUrl);
         var catObj = JsonSerializer.Deserialize<JsonObject>(await catResponse.Content.ReadAsStringAsync())!;
         var version = catObj["version"]!.ToString();
