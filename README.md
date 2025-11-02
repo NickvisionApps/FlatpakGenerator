@@ -13,3 +13,6 @@ This tool is a replacement for the [flatpak-dotnet-generator](https://github.com
 
 ## Dependencies
 - .NET 9.0
+
+## Installation
+<a href='https://www.nuget.org/packages/Nickvision.FlatpakGenerator/'><img width='140' alt='Download on Nuget' src='https://www.nuget.org/Content/gallery/img/logo-header.svg'/></a>
