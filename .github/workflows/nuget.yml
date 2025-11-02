@@ -1,0 +1,24 @@
+on:
+  push:
+    tags:
+    - "[0-9]+.[0-9]+.[0-9]+"
+name: Nuget
+jobs:
+  release:
+    name: "Release on Nuget"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+      - name: "Setup .NET"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+      - name: "Restore"
+        run: dotnet restore
+      - name: "Build"
+        run: dotnet build Nickvision.FlatpakGenerator -c Release --no-restore
+      - name: "Pack"
+        run: dotnet pack Nickvision.FlatpakGenerator -c Release --no-build --output .
+      - name: "Publish"
+        run: dotnet nuget push "*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

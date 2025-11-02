@@ -1,0 +1,38 @@
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types: [ "review_requested", "ready_for_review" ]
+  workflow_dispatch:
+name: Linux
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  build:
+    name: "Build on Linux"
+    strategy:
+      matrix:
+        variant:
+          - arch: x64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.variant.runner }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: "Setup .NET"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+      - name: "Restore"
+        run: dotnet restore
+      - name: "Build"
+        run: dotnet build Nickvision.FlatpakGenerator -c Release --no-restore
+      - name: "Test"
+        run: dotnet test Nickvision.FlatpakGenerator -c Release --no-build
+    

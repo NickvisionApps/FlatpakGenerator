@@ -1,0 +1,9 @@
+# Auto detect text files and perform LF normalization
+* text eol=lf
+*.c eol=crlf
+*.json eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.exe binary

@@ -1,169 +1,129 @@
-﻿using CommandLine;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.CommandLine;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace Nickvision.FlatpakGenerator;
 
 public class Program
 {
-    public static async Task Main(string[] args) => await new Program().RunAsync(args);
+    private static FlatpakSourcesGenerator _generator;
     
-    /// <summary>
-    /// Construct Program
-    /// </summary>
-    private Program()
+    static Program()
     {
-    }
-
-    /// <summary>
-    /// Run the program
-    /// </summary>
-    /// <param name="args">Command-line arguments</param>
-    private async Task RunAsync(string[] args)
-    {
-        await Parser.Default.ParseArguments<Options>(args)
-            .WithParsedAsync(async o =>
-            {
-                var sources = GenerateSourcesFromProject(o.InputFile, o.DestDir, o.TempDir, o.RunAsUser);
-                var addPackages = o.AdditionalPackages.ToList();
-                if (!o.NoSelfContained)
-                {
-                    addPackages.Add("microsoft.aspnetcore.app.runtime.linux-arm");
-                    addPackages.Add("microsoft.aspnetcore.app.runtime.linux-arm64");
-                    addPackages.Add("microsoft.aspnetcore.app.runtime.linux-x64");
-                    addPackages.Add("microsoft.netcore.app.runtime.linux-arm");
-                    addPackages.Add("microsoft.netcore.app.runtime.linux-arm64");
-                    addPackages.Add("microsoft.netcore.app.runtime.linux-x64");
-                }
-                foreach (var pkg in addPackages)
-                {
-                    sources.Add(await GetPackageAsync(pkg, o.DestDir));
-                }
-                await File.WriteAllTextAsync(o.OutputFile, JsonSerializer.Serialize(sources, new JsonSerializerOptions { WriteIndented = true }));
-                Console.WriteLine($"Sources are written to file \"{o.OutputFile}\"");
-            });
+        _generator = new FlatpakSourcesGenerator();
     }
     
-    /// <summary>
-    /// Generate sources list from CSPROJ file
-    /// </summary>
-    /// <param name="inputFile">CSPROJ file</param>
-    /// <param name="destDir">Destination directory for sources</param>
-    /// <param name="tempDir">Temporary directory to restore packages to get data</param>
-    /// <param name="runAsUser">Whether or not to run flatpak in user mode</param>
-    /// <returns>List with packages data</returns>
-    private List<Dictionary<string, string>> GenerateSourcesFromProject(string inputFile, string destDir, string tempDir, bool runAsUser)
+    public static async Task<int> Main(string[] args)
     {
-        var process = new Process
+        if (Environment.OSVersion.Platform != PlatformID.Unix)
         {
-            StartInfo = new ProcessStartInfo
+            Console.Error.WriteLine("This tool can only be run on Linux.");
+            return 1;
+        }
+        var rootCommand = new RootCommand("A tool to generate Flatpak sources file for .NET projects");
+        var checkCommand = new Command("check", "Checks for the available of Flatpak .NET runtimes")
+        {
+            new Option<int>("--dotnet")
             {
-                FileName = "flatpak",
-                ArgumentList = { "run",
-                        "--env=DOTNET_CLI_TELEMETRY_OPTOUT=true", "--env=DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true",
-                        "--command=sh", "--runtime=org.freedesktop.Sdk//24.08", "--share=network", "--filesystem=host", "org.freedesktop.Sdk.Extension.dotnet9//24.08", "-c",
-                        "PATH=\"${PATH}:/usr/lib/sdk/dotnet9/bin\" LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:/usr/lib/sdk/dotnet9/lib\" exec dotnet restore \"$@\"",
-                        "--", "--packages", tempDir, inputFile
+                Description = "The .NET SDK version to target",
+                Required = true,
+                Aliases =
+                {
+                    "-d"
                 },
-                UseShellExecute = false
+                DefaultValueFactory = r => 8
+            },
+            new Option<bool>("--run-as-user")
+            {
+                Description = "Whether to run flatpak commands as user",
+                Required = false,
+                Aliases =
+                {
+                    "-u"
+                }
             }
         };
-        if(runAsUser)
+        var generateCommand = new Command("generate", "Generates a Flatpak sources file")
         {
-            Console.WriteLine("Flatpak running in user mode");
-            process.StartInfo.ArgumentList.Insert(1, "--user");
-        }
-        process.Start();
-        process.WaitForExit();
-        var result = new List<Dictionary<string, string>>();
-        foreach (var file in Directory.GetFiles(tempDir, "*.nupkg.sha512", SearchOption.AllDirectories))
-        {
-            var split = file.Split("/");
-            var name = split[^3];
-            var version = split[^2];
-            var filename = $"{name}.{version}.nupkg";
-            using var reader = new StreamReader(file);
-            var sha512 = Convert.ToHexString(Convert.FromBase64String(reader.ReadToEnd())).ToLower();
-            result.Add(new Dictionary<string, string>
+            new Option<string>("--input")
             {
-                { "type", "file" },
-                { "url", $"https://api.nuget.org/v3-flatcontainer/{name}/{version}/{filename}" },
-                { "sha512", sha512 },
-                { "dest", destDir },
-                { "dest-filename", filename }
-            });
-        }
-        Directory.Delete(tempDir, true);
-        result.Sort((a, b) => a["dest-filename"].CompareTo(b["dest-filename"]));
-        return result;
-    }
-    
-    /// <summary>
-    /// Get data for the latest version of the package
-    /// </summary>
-    /// <param name="name">Package name</param>
-    /// <param name="destDir">Destination directory for sources</param>
-    /// <returns>Data for the package</returns>
-    private async Task<Dictionary<string, string>> GetPackageAsync(string name, string destDir)
-    {
-        name = name.ToLower();
-        using var httpClient = new HttpClient();
-        JsonObject regObj;
-        try
-        {
-            var regResponse = await httpClient.GetAsync($"https://api.nuget.org/v3/registration5-semver1/{name}/index.json");
-            var s = await regResponse.Content.ReadAsStringAsync();
-            regObj = JsonSerializer.Deserialize<JsonObject>(s)!;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            Console.WriteLine("Failed to get package data for " + name);
-            Environment.Exit(1);
-            return null!;
-        }
-        string catalogUrl;
-        try
-        {
-            catalogUrl = ((regObj["items"] as JsonArray)![^1]!["items"] as JsonArray)![^1]!["catalogEntry"]!["@id"]!.ToString();
-        }
-        catch
-        {
-            try
+                Description = "The csproj file path",
+                Required = true,
+                Aliases =
+                {
+                    "-i"
+                }
+            },
+            new Option<int>("--dotnet")
             {
-                var detailedResponseUrl = (regObj["items"] as JsonArray)![^1]!["@id"]!.ToString();
-                var detailedResponse = await httpClient.GetAsync(detailedResponseUrl);
-                var detailedResponseObj = JsonSerializer.Deserialize<JsonObject>(await detailedResponse.Content.ReadAsStringAsync())!;
-                catalogUrl = (detailedResponseObj["items"] as JsonArray)![^1]!["catalogEntry"]!["@id"]!.ToString();
+                Description = "The .NET SDK version to target",
+                Required = true,
+                Aliases =
+                {
+                    "-d"
+                },
+                DefaultValueFactory = r => 8
+            },
+            new Option<string>("--output")
+            {
+                Description = "The output Flatpak sources file path",
+                Required = false,
+                Aliases =
+                {
+                    "-o"
+                }
+            },
+            new Option<bool>("--self-contained")
+            {
+                Description = "Whether to generate sources for a self-contained publish",
+                Required = false,
+                Aliases =
+                {
+                    "-s"
+                }
+            },
+            new Option<bool>("--run-as-user")
+            {
+                Description = "Whether to run flatpak commands as user",
+                Required = false,
+                Aliases =
+                {
+                    "-u"
+                }
+            },
+            new Option<string>("--temp")
+            {
+                Description = "The temporary directory path",
+                Required = false,
+                Aliases =
+                {
+                    "-t"
+                }
             }
-            catch(Exception e)
-            {
-                Console.WriteLine(e);
-                Console.WriteLine("Failed to parse catalog url for " + name);
-                Environment.Exit(1);
-                return null!;
-            }
-        }
-        var catResponse = await httpClient.GetAsync(catalogUrl);
-        var catObj = JsonSerializer.Deserialize<JsonObject>(await catResponse.Content.ReadAsStringAsync())!;
-        var version = catObj["version"]!.ToString();
-        var sha512 = Convert.ToHexString(Convert.FromBase64String(catObj["packageHash"]!.ToString())).ToLower();
-        var filename = $"{name}.{version}.nupkg";
-        Console.WriteLine($"Added package {filename}");
-        return new Dictionary<string, string>
-        {
-            { "type", "file" },
-            { "url", $"https://api.nuget.org/v3-flatcontainer/{name}/{version}/{filename}" },
-            { "sha512", sha512 },
-            { "dest", destDir },
-            { "dest-filename", filename }
         };
+        checkCommand.SetAction(async x =>
+        {
+            await _generator.CheckRuntimeAsync(
+                "org.freedesktop.Sdk//24.08",
+                x.GetValue<bool>("--run-as-user"));
+            await _generator.CheckRuntimeAsync(
+                $"org.freedesktop.Sdk.Extension.dotnet{x.GetRequiredValue<int>("--dotnet")}//24.08", 
+                x.GetValue<bool>("--run-as-user"));
+        });
+        generateCommand.SetAction(async x =>
+        {
+            var sources = await _generator.GenerateSourcesAsync(
+                x.GetRequiredValue<string>("--input"),
+                x.GetRequiredValue<int>("--dotnet"),
+                x.GetValue<string>("--temp"),
+                x.GetValue<bool>("--self-contained"),
+                x.GetValue<bool>("--run-as-user"));
+            await _generator.WriteSourcesFileAsync(sources, x.GetValue<string>("--output"));
+        });
+        rootCommand.Subcommands.Add(checkCommand);
+        rootCommand.Subcommands.Add(generateCommand);
+        return await rootCommand.Parse(args).InvokeAsync();
     }
 }

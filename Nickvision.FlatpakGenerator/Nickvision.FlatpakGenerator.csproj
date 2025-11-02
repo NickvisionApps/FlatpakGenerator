@@ -1,31 +1,36 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <PackageId>Nickvision.FlatpakGenerator</PackageId>
-    <Version>2025.1.0</Version>
-    <Company>Nickvision</Company>
-    <Authors>Nickvision</Authors>
-    <Description>A tool to generate Flatpak sources file for a C# project</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>(c) Nickvision 2021-2025</Copyright>
-    <PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/NickvisionApps/FlatpakGenerator</RepositoryUrl>
-    <PackageReleaseNotes>- Update to .NET 9</PackageReleaseNotes>
-    <PackageIcon>logo-r.png</PackageIcon>
-    <PackAsTool>true</PackAsTool>
-    <ToolCommandName>flatpak-dotnet-generator</ToolCommandName>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>Nickvision.FlatpakGenerator</PackageId>
+        <Version>2025.11.0</Version>
+        <Company>Nickvision</Company>
+        <Authors>Nickvision</Authors>
+        <Description>A tool to generate Flatpak sources file for .NET projects</Description>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackAsTool>true</PackAsTool>
+        <Copyright>(c) Nickvision 2021-2025</Copyright>
+        <PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/NickvisionApps/FlatpakGenerator</RepositoryUrl>
+        <Title>Nickvision.FlatpakGenerator</Title>
+        <PackageIcon>logo.png</PackageIcon>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.9.1" />
-  </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="System.CommandLine" Version="2.0.0-rc.2.25502.107" />
+    </ItemGroup>
 
-  <ItemGroup>
-      <None Include="Resources\logo-r.png" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
+    <ItemGroup>
+      <None Include="..\resources\logo.png">
+        <Pack>True</Pack>
+        <PackagePath/>
+        <Link>logo.png</Link>
+      </None>
+    </ItemGroup>
+    
 </Project>

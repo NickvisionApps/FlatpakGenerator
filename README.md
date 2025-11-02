@@ -2,21 +2,14 @@
 
 # Nickvision.FlatpakGenerator
 
-<img width='128' height='128' alt='Logo' src='Nickvision.FlatpakGenerator/Resources/logo-r.png'/>
+<img width='128' height='128' alt='Logo' src='resources/logo-rounded.png'/>
 
- **A tool to generate Flatpak sources file for a C# project**
+**A tool to generate Flatpak sources file for .NET projectst**
 
- This tool is a replacement for [flatpak-dotnet-generator](https://github.com/flatpak/flatpak-builder-tools/tree/master/dotnet) python script, with some changes:
- 1. Written in C# (obviously)
- 2. Latest version of Freedesktop SDK and Dotnet are used
- 3. Runtime packages required to build self-contained programs get added automatically (can be disabled with `--no-self-contained`)
- 4. You can set additional packages to add with `-a` option
+This tool is a replacement for the [flatpak-dotnet-generator](https://github.com/flatpak/flatpak-builder-tools/tree/master/dotnet) python script, with some changes:
+1. Written in C# (obviously)
+2. Support for adding runtime packages that are required to build self-contained programs (enabled with `--self-contained`/`-s` flag)
+3. Support for running `flatpak` commands in user mode (enabled with `--user`/`-u` flag)
 
-Example:
-
-`flatpak-dotnet-generator YourProject.csproj -o sources.json -d dotnet-sources -a cake.tool cake.filehelpers`
-
-Run `flatpak-dotnet-generator --help` to see full list of options.
-
-# Installation
-<a href='https://www.nuget.org/packages/Nickvision.FlatpakGenerator/'><img width='140' alt='Download on Nuget' src='https://www.nuget.org/Content/gallery/img/logo-header.svg'/></a>
+## Dependencies
+- .NET 9.0
