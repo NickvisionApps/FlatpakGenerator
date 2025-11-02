@@ -6,7 +6,7 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>Nickvision.FlatpakGenerator</PackageId>
-        <Version>2025.11.0</Version>
+        <Version>2025.11.1</Version>
         <Company>Nickvision</Company>
         <Authors>Nickvision</Authors>
         <Description>A tool to generate Flatpak sources file for .NET projects</Description>

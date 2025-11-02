@@ -126,7 +126,7 @@ public class FlatpakSourcesGenerator
         await process.WaitForExitAsync();
         if (process.ExitCode != 0)
         {
-            Console.Error.WriteLine($"[Error] Unable to restore project: {await process.StandardError.ReadToEndAsync()}");
+            Console.Error.WriteLine($"[Error] Unable to restore project: {await process.StandardOutput.ReadToEndAsync()}");
             Directory.Delete(temp, true);
             return [];
         }
@@ -200,7 +200,7 @@ public class FlatpakSourcesGenerator
         return new NugetSource()
         {
             Url = $"https://api.nuget.org/v3-flatcontainer/{name}/{latestEntry.Version}/{filename}",
-            Sha512 = latestEntry.PackageHash.ToLower(),
+            Sha512 = Convert.ToHexString(Convert.FromBase64String(latestEntry.PackageHash)).ToLower(),
             Destination = "nuget-sources",
             DestinationFileName = filename
         };
