@@ -5,11 +5,11 @@ namespace Nickvision.FlatpakGenerator;
 
 public class NugetCatalog
 {
-    [JsonPropertyName("@id")]
-    public string Url { get; set; }
     public int Count { get; set; }
     [JsonPropertyName("items")]
     public List<NugetCatalogPage> Pages { get; set; }
+    [JsonPropertyName("@id")]
+    public string Url { get; set; }
 
     public NugetCatalog()
     {

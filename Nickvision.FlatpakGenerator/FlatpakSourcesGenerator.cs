@@ -18,25 +18,25 @@ public class FlatpakSourcesGenerator
     static FlatpakSourcesGenerator()
     {
         HttpClient = new HttpClient();
-        JsonSerializerOptions = new JsonSerializerOptions()
+        JsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
     }
-    
+
     public async Task<bool> CheckRuntimeAsync(string runtime, bool runAsUser)
     {
-        using var process = new Process()
+        using var process = new Process
         {
-            StartInfo = new ProcessStartInfo()
+            StartInfo = new ProcessStartInfo
             {
                 FileName = "flatpak",
                 ArgumentList =
                 {
                     "list",
                     "--runtime",
-                    "--columns=application,branch",
+                    "--columns=application,branch"
                 },
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -68,16 +68,12 @@ public class FlatpakSourcesGenerator
         return false;
     }
 
-    public async Task<List<NugetSource>> GenerateSourcesAsync(string input,
-        int dotnetVersion,
-        string? temp,
-        bool selfContained,
-        bool runAsUser)
+    public async Task<List<NugetSource>> GenerateSourcesAsync(string input, int dotnetVersion, string? temp, bool selfContained, bool runAsUser)
     {
         input = input.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         temp = Path.Combine(temp?.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ?? Directory.GetCurrentDirectory(), "nuget-temp");
         Directory.CreateDirectory(temp);
-        if(string.IsNullOrEmpty(input) || !File.Exists(input) || Path.GetExtension(input) != ".csproj")
+        if (string.IsNullOrEmpty(input) || !File.Exists(input) || Path.GetExtension(input) != ".csproj")
         {
             Console.Error.WriteLine("[Error] Invalid input csproj file path");
             return [];
@@ -90,9 +86,9 @@ public class FlatpakSourcesGenerator
         {
             return [];
         }
-        using var process = new Process()
+        using var process = new Process
         {
-            StartInfo = new ProcessStartInfo()
+            StartInfo = new ProcessStartInfo
             {
                 FileName = "flatpak",
                 ArgumentList =
@@ -131,7 +127,7 @@ public class FlatpakSourcesGenerator
             return [];
         }
         var sources = new List<NugetSource>();
-        foreach(var file in Directory.GetFiles(temp, "*.nupkg.sha512", SearchOption.AllDirectories))
+        foreach (var file in Directory.GetFiles(temp, "*.nupkg.sha512", SearchOption.AllDirectories))
         {
             using var reader = new StreamReader(file);
             var hash = Convert.ToHexString(Convert.FromBase64String(await reader.ReadToEndAsync())).ToLower();
@@ -151,7 +147,8 @@ public class FlatpakSourcesGenerator
         Directory.Delete(temp, true);
         if (selfContained)
         {
-            foreach (var extra in new[]{
+            foreach (var extra in new[]
+            {
                 "microsoft.aspnetcore.app.runtime.linux-arm",
                 "microsoft.aspnetcore.app.runtime.linux-arm64",
                 "microsoft.aspnetcore.app.runtime.linux-x64",
@@ -197,7 +194,7 @@ public class FlatpakSourcesGenerator
         }
         var filename = $"{name}.{latestEntry.Version}.nupkg";
         Console.WriteLine($"[Found] {name}");
-        return new NugetSource()
+        return new NugetSource
         {
             Url = $"https://api.nuget.org/v3-flatcontainer/{name}/{latestEntry.Version}/{filename}",
             Sha512 = Convert.ToHexString(Convert.FromBase64String(latestEntry.PackageHash)).ToLower(),
@@ -213,7 +210,7 @@ public class FlatpakSourcesGenerator
         {
             output = "nuget-sources.json";
         }
-        else if(!string.IsNullOrEmpty(output) && Path.GetExtension(output) != ".json")
+        else if (!string.IsNullOrEmpty(output) && Path.GetExtension(output) != ".json")
         {
             output += ".json";
         }

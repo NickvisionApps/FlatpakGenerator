@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Nickvision.FlatpakGenerator;
 
 public class Program
 {
-    private static FlatpakSourcesGenerator _generator;
-    
+    private static readonly FlatpakSourcesGenerator _generator;
+
     static Program()
     {
         _generator = new FlatpakSourcesGenerator();
     }
-    
+
     public static async Task<int> Main(string[] args)
     {
         if (Environment.OSVersion.Platform != PlatformID.Unix)
@@ -105,21 +103,12 @@ public class Program
         };
         checkCommand.SetAction(async x =>
         {
-            await _generator.CheckRuntimeAsync(
-                "org.freedesktop.Sdk//24.08",
-                x.GetValue<bool>("--run-as-user"));
-            await _generator.CheckRuntimeAsync(
-                $"org.freedesktop.Sdk.Extension.dotnet{x.GetRequiredValue<int>("--dotnet")}//24.08", 
-                x.GetValue<bool>("--run-as-user"));
+            await _generator.CheckRuntimeAsync("org.freedesktop.Sdk//24.08", x.GetValue<bool>("--run-as-user"));
+            await _generator.CheckRuntimeAsync($"org.freedesktop.Sdk.Extension.dotnet{x.GetRequiredValue<int>("--dotnet")}//24.08", x.GetValue<bool>("--run-as-user"));
         });
         generateCommand.SetAction(async x =>
         {
-            var sources = await _generator.GenerateSourcesAsync(
-                x.GetRequiredValue<string>("--input"),
-                x.GetRequiredValue<int>("--dotnet"),
-                x.GetValue<string>("--temp"),
-                x.GetValue<bool>("--self-contained"),
-                x.GetValue<bool>("--run-as-user"));
+            var sources = await _generator.GenerateSourcesAsync(x.GetRequiredValue<string>("--input"), x.GetRequiredValue<int>("--dotnet"), x.GetValue<string>("--temp"), x.GetValue<bool>("--self-contained"), x.GetValue<bool>("--run-as-user"));
             await _generator.WriteSourcesFileAsync(sources, x.GetValue<string>("--output"));
         });
         rootCommand.Subcommands.Add(checkCommand);
