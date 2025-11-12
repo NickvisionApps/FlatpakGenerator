@@ -12,7 +12,7 @@ This tool is a replacement for the [flatpak-dotnet-generator](https://github.com
 3. Support for running `flatpak` commands in user mode (enabled with `--user`/`-u` flag)
 
 ## Dependencies
-- .NET 9.0
+- .NET 8/9/10
 
 ## Installation
 <a href='https://www.nuget.org/packages/Nickvision.FlatpakGenerator/'><img width='140' alt='Download on Nuget' src='https://www.nuget.org/Content/gallery/img/logo-header.svg'/></a>
