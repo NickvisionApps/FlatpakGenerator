@@ -6,18 +6,11 @@ namespace Nickvision.FlatpakGenerator;
 
 public class Program
 {
-    private static readonly FlatpakSourcesGenerator _generator;
-
-    static Program()
-    {
-        _generator = new FlatpakSourcesGenerator();
-    }
-
     public static async Task<int> Main(string[] args)
     {
-        if (Environment.OSVersion.Platform != PlatformID.Unix)
+        if (!OperatingSystem.IsLinux())
         {
-            Console.Error.WriteLine("This tool can only be run on Linux.");
+            Console.Error.WriteLine("This tool can only run on Linux.");
             return 1;
         }
         var rootCommand = new RootCommand("A tool to generate Flatpak sources file for .NET projects");
@@ -103,13 +96,13 @@ public class Program
         };
         checkCommand.SetAction(async x =>
         {
-            await _generator.CheckRuntimeAsync("org.freedesktop.Sdk//24.08", x.GetValue<bool>("--run-as-user"));
-            await _generator.CheckRuntimeAsync($"org.freedesktop.Sdk.Extension.dotnet{x.GetRequiredValue<int>("--dotnet")}//24.08", x.GetValue<bool>("--run-as-user"));
+            await FlatpakSourcesGenerator.CheckRuntimeAsync("org.freedesktop.Sdk//24.08", x.GetValue<bool>("--run-as-user"));
+            await FlatpakSourcesGenerator.CheckRuntimeAsync($"org.freedesktop.Sdk.Extension.dotnet{x.GetRequiredValue<int>("--dotnet")}//24.08", x.GetValue<bool>("--run-as-user"));
         });
         generateCommand.SetAction(async x =>
         {
-            var sources = await _generator.GenerateSourcesAsync(x.GetRequiredValue<string>("--input"), x.GetRequiredValue<int>("--dotnet"), x.GetValue<string>("--temp"), x.GetValue<bool>("--self-contained"), x.GetValue<bool>("--run-as-user"));
-            await _generator.WriteSourcesFileAsync(sources, x.GetValue<string>("--output"));
+            var sources = await FlatpakSourcesGenerator.GenerateSourcesAsync(x.GetRequiredValue<string>("--input"), x.GetRequiredValue<int>("--dotnet"), x.GetValue<string>("--temp"), x.GetValue<bool>("--self-contained"), x.GetValue<bool>("--run-as-user"));
+            await FlatpakSourcesGenerator.WriteSourcesFileAsync(sources, x.GetValue<string>("--output"));
         });
         rootCommand.Subcommands.Add(checkCommand);
         rootCommand.Subcommands.Add(generateCommand);

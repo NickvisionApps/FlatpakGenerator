@@ -25,7 +25,7 @@ public class FlatpakSourcesGenerator
         };
     }
 
-    public async Task<bool> CheckRuntimeAsync(string runtime, bool runAsUser)
+    public static async Task<bool> CheckRuntimeAsync(string runtime, bool runAsUser)
     {
         using var process = new Process
         {
@@ -68,7 +68,7 @@ public class FlatpakSourcesGenerator
         return false;
     }
 
-    public async Task<List<NugetSource>> GenerateSourcesAsync(string input, int dotnetVersion, string? temp, bool selfContained, bool runAsUser)
+    public static async Task<List<NugetSource>> GenerateSourcesAsync(string input, int dotnetVersion, string? temp, bool selfContained, bool runAsUser)
     {
         input = input.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         temp = Path.Combine(temp?.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ?? Directory.GetCurrentDirectory(), "nuget-temp");
@@ -169,7 +169,22 @@ public class FlatpakSourcesGenerator
         return sources;
     }
 
-    private async Task<NugetSource?> GetExtraSourceAsync(string name)
+    public static async Task WriteSourcesFileAsync(List<NugetSource> sources, string? output)
+    {
+        output = output?.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+        if (string.IsNullOrEmpty(output))
+        {
+            output = "nuget-sources.json";
+        }
+        else if (!string.IsNullOrEmpty(output) && Path.GetExtension(output) != ".json")
+        {
+            output += ".json";
+        }
+        await File.WriteAllTextAsync(output, JsonSerializer.Serialize(sources, JsonSerializerOptions));
+        Console.WriteLine($"[Info] Sources file written to {Path.GetFullPath(output)}");
+    }
+
+    private static async Task<NugetSource?> GetExtraSourceAsync(string name)
     {
         name = name.ToLower();
         var catalog = await HttpClient.GetFromJsonAsync<NugetCatalog>($"https://api.nuget.org/v3/registration5-semver1/{name}/index.json", JsonSerializerOptions);
@@ -201,20 +216,5 @@ public class FlatpakSourcesGenerator
             Destination = "nuget-sources",
             DestinationFileName = filename
         };
-    }
-
-    public async Task WriteSourcesFileAsync(List<NugetSource> sources, string? output)
-    {
-        output = output?.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-        if (string.IsNullOrEmpty(output))
-        {
-            output = "nuget-sources.json";
-        }
-        else if (!string.IsNullOrEmpty(output) && Path.GetExtension(output) != ".json")
-        {
-            output += ".json";
-        }
-        await File.WriteAllTextAsync(output, JsonSerializer.Serialize(sources, JsonSerializerOptions));
-        Console.WriteLine($"[Info] Sources file written to {Path.GetFullPath(output)}");
     }
 }
