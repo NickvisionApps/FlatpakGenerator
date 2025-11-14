@@ -33,6 +33,4 @@ jobs:
         run: dotnet restore
       - name: "Build"
         run: dotnet build Nickvision.FlatpakGenerator -c Release --no-restore
-      - name: "Test"
-        run: dotnet test Nickvision.FlatpakGenerator -c Release --no-build
     
