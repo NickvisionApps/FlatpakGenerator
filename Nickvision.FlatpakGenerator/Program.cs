@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CommandLine;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace Nickvision.FlatpakGenerator;
@@ -24,7 +25,17 @@ public class Program
                 {
                     "-d"
                 },
-                DefaultValueFactory = r => 8
+                DefaultValueFactory = r => 10
+            },
+            new Option<string>("--freedesktop")
+            {
+                Description = "The FreeDesktop SDK version to target",
+                Required = true,
+                Aliases =
+                {
+                    "-f"
+                },
+                DefaultValueFactory = r => "25.08"
             },
             new Option<bool>("--run-as-user")
             {
@@ -55,7 +66,17 @@ public class Program
                 {
                     "-d"
                 },
-                DefaultValueFactory = r => 8
+                DefaultValueFactory = r => 10
+            },
+            new Option<string>("--freedesktop")
+            {
+                Description = "The FreeDesktop SDK version to target",
+                Required = true,
+                Aliases =
+                {
+                    "-f"
+                },
+                DefaultValueFactory = r => "25.08"
             },
             new Option<string>("--output")
             {
@@ -96,16 +117,51 @@ public class Program
         };
         checkCommand.SetAction(async x =>
         {
-            await FlatpakSourcesGenerator.CheckRuntimeAsync("org.freedesktop.Sdk//24.08", x.GetValue<bool>("--run-as-user"));
-            await FlatpakSourcesGenerator.CheckRuntimeAsync($"org.freedesktop.Sdk.Extension.dotnet{x.GetRequiredValue<int>("--dotnet")}//24.08", x.GetValue<bool>("--run-as-user"));
+            if(!IsDotnetVersionValid(x.GetValue<int>("--dotnet")))
+            {
+                Console.Error.WriteLine("[Error] Invalid .NET version. Supported versions are 8, 9, and 10.");
+                return;
+            }
+            if(!IsFreedesktopVersionValid(x.GetValue<string>("--freedesktop"), x.GetValue<int>("--dotnet")))
+            {
+                Console.Error.WriteLine("[Error] Invalid FreeDesktop version for the specified .NET version.");
+                return;
+            }
+            await FlatpakSourcesGenerator.CheckRuntimeAsync($"org.freedesktop.Sdk//{x.GetValue<string>("--freedesktop")}", x.GetValue<bool>("--run-as-user"));
+            await FlatpakSourcesGenerator.CheckRuntimeAsync($"org.freedesktop.Sdk.Extension.dotnet{x.GetRequiredValue<int>("--dotnet")}//{x.GetValue<string>("--freedesktop")}", x.GetValue<bool>("--run-as-user"));
         });
         generateCommand.SetAction(async x =>
         {
-            var sources = await FlatpakSourcesGenerator.GenerateSourcesAsync(x.GetRequiredValue<string>("--input"), x.GetRequiredValue<int>("--dotnet"), x.GetValue<string>("--temp"), x.GetValue<bool>("--self-contained"), x.GetValue<bool>("--run-as-user"));
+            if (!IsDotnetVersionValid(x.GetValue<int>("--dotnet")))
+            {
+                Console.Error.WriteLine("[Error] Invalid .NET version. Supported versions are 8, 9, and 10.");
+                return;
+            }
+            if (!IsFreedesktopVersionValid(x.GetValue<string>("--freedesktop"), x.GetValue<int>("--dotnet")))
+            {
+                Console.Error.WriteLine("[Error] Invalid FreeDesktop version for the specified .NET version.");
+                return;
+            }
+            var sources = await FlatpakSourcesGenerator.GenerateSourcesAsync(x.GetRequiredValue<string>("--input"), x.GetRequiredValue<int>("--dotnet"), x.GetRequiredValue<string>("--freedesktop"), x.GetValue<string>("--temp"), x.GetValue<bool>("--self-contained"), x.GetValue<bool>("--run-as-user"));
             await FlatpakSourcesGenerator.WriteSourcesFileAsync(sources, x.GetValue<string>("--output"));
         });
         rootCommand.Subcommands.Add(checkCommand);
         rootCommand.Subcommands.Add(generateCommand);
         return await rootCommand.Parse(args).InvokeAsync();
+    }
+
+    private static bool IsDotnetVersionValid(int dotnetVersion) => dotnetVersion >= 8 && dotnetVersion <= 10;
+
+    private static bool IsFreedesktopVersionValid(string? freedesktopVersion, int dotnetVersion)
+    {
+        if(freedesktopVersion == "24.08")
+        {
+            return dotnetVersion != 8;
+        }
+        else if(freedesktopVersion == "25.08")
+        {
+            return true;
+        }
+        return false;
     }
 }

@@ -68,9 +68,10 @@ public class FlatpakSourcesGenerator
         return false;
     }
 
-    public static async Task<List<NugetSource>> GenerateSourcesAsync(string input, int dotnetVersion, string? temp, bool selfContained, bool runAsUser)
+    public static async Task<List<NugetSource>> GenerateSourcesAsync(string input, int dotnetVersion, string? freedesktopVersion, string? temp, bool selfContained, bool runAsUser)
     {
         input = input.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+        freedesktopVersion = freedesktopVersion ?? "25.08";
         temp = Path.Combine(temp?.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ?? Directory.GetCurrentDirectory(), "nuget-temp");
         Directory.CreateDirectory(temp);
         if (string.IsNullOrEmpty(input) || !File.Exists(input) || Path.GetExtension(input) != ".csproj")
@@ -78,11 +79,11 @@ public class FlatpakSourcesGenerator
             Console.Error.WriteLine("[Error] Invalid input csproj file path");
             return [];
         }
-        if (!await CheckRuntimeAsync($"org.freedesktop.Sdk//24.08", runAsUser))
+        if (!await CheckRuntimeAsync($"org.freedesktop.Sdk//{freedesktopVersion}", runAsUser))
         {
             return [];
         }
-        if (!await CheckRuntimeAsync($"org.freedesktop.Sdk.Extension.dotnet{dotnetVersion}//24.08", runAsUser))
+        if (!await CheckRuntimeAsync($"org.freedesktop.Sdk.Extension.dotnet{dotnetVersion}//{freedesktopVersion}", runAsUser))
         {
             return [];
         }
@@ -97,10 +98,10 @@ public class FlatpakSourcesGenerator
                     "--env=DOTNET_CLI_TELEMETRY_OPTOUT=true",
                     "--env=DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true",
                     "--command=sh",
-                    "--runtime=org.freedesktop.Sdk//24.08",
+                    $"--runtime=org.freedesktop.Sdk//{freedesktopVersion}",
                     "--share=network",
                     "--filesystem=host",
-                    $"org.freedesktop.Sdk.Extension.dotnet{dotnetVersion}//24.08",
+                    $"org.freedesktop.Sdk.Extension.dotnet{dotnetVersion}//{freedesktopVersion}",
                     "-c",
                     $"PATH=\"${{PATH}}:/usr/lib/sdk/dotnet{dotnetVersion}/bin\" LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:/usr/lib/sdk/dotnet{dotnetVersion}/lib\" exec dotnet restore \"$@\"",
                     "--",

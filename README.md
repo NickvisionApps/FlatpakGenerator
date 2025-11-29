@@ -10,6 +10,13 @@ This tool is a replacement for the [flatpak-dotnet-generator](https://github.com
 1. Written in C# (obviously)
 2. Support for adding runtime packages that are required to build self-contained programs (enabled with `--self-contained`/`-s` flag)
 3. Support for running `flatpak` commands in user mode (enabled with `--user`/`-u` flag)
+4. Support for specifying dotnet versions (specified with `--dotnet`) and freedesktop versions (specified with `--freedesktop`) to use
+
+| .NET SDK | FreeDesktop 24.08 | FreeDesktop 25.08 |
+|----------|-------------------|-------------------|
+| 8        | ✅                 | ✅                 |
+| 9        | ✅                 | ✅                 |
+| 10       | ❌                 | ✅                 |
 
 ## Dependencies
 - .NET 8/9/10
