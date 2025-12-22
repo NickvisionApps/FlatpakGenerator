@@ -68,7 +68,7 @@ public class FlatpakSourcesGenerator
         return false;
     }
 
-    public static async Task<List<NugetSource>> GenerateSourcesAsync(string input, int dotnetVersion, string? freedesktopVersion, string? temp, bool selfContained, bool runAsUser)
+    public static async Task<List<NugetSource>> GenerateSourcesAsync(string input, int dotnetVersion, string? freedesktopVersion, string? temp, bool selfContained, bool runAsUser, string? destinationName)
     {
         input = input.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         freedesktopVersion = freedesktopVersion ?? "25.08";
@@ -141,7 +141,7 @@ public class FlatpakSourcesGenerator
             {
                 Url = $"https://api.nuget.org/v3-flatcontainer/{name}/{version}/{filename}",
                 Sha512 = hash,
-                Destination = "nuget-sources",
+                Destination = destinationName ?? "nuget-sources",
                 DestinationFileName = filename
             });
         }
@@ -158,7 +158,7 @@ public class FlatpakSourcesGenerator
                 "microsoft.netcore.app.runtime.linux-x64"
             })
             {
-                var extraSource = await GetExtraSourceAsync(extra);
+                var extraSource = await GetExtraSourceAsync(extra, destinationName);
                 if (extraSource is not null)
                 {
                     sources.Add(extraSource);
@@ -185,7 +185,7 @@ public class FlatpakSourcesGenerator
         Console.WriteLine($"[Info] Sources file written to {Path.GetFullPath(output)}");
     }
 
-    private static async Task<NugetSource?> GetExtraSourceAsync(string name)
+    private static async Task<NugetSource?> GetExtraSourceAsync(string name, string? destinationName)
     {
         name = name.ToLower();
         var catalog = await HttpClient.GetFromJsonAsync<NugetCatalog>($"https://api.nuget.org/v3/registration5-semver1/{name}/index.json", JsonSerializerOptions);
@@ -214,7 +214,7 @@ public class FlatpakSourcesGenerator
         {
             Url = $"https://api.nuget.org/v3-flatcontainer/{name}/{latestEntry.Version}/{filename}",
             Sha512 = Convert.ToHexString(Convert.FromBase64String(latestEntry.PackageHash)).ToLower(),
-            Destination = "nuget-sources",
+            Destination = destinationName ?? "nuget-sources",
             DestinationFileName = filename
         };
     }

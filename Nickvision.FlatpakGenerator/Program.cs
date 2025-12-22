@@ -113,6 +113,15 @@ public class Program
                 {
                     "-t"
                 }
+            },
+            new Option<string>("--destination-name")
+            {
+                Description = "The name to use for the flatpak sources destination folder",
+                Required = false,
+                Aliases =
+                {
+                    "-d"
+                }
             }
         };
         checkCommand.SetAction(async x =>
@@ -142,8 +151,11 @@ public class Program
                 Console.Error.WriteLine("[Error] Invalid FreeDesktop version for the specified .NET version.");
                 return;
             }
-            var sources = await FlatpakSourcesGenerator.GenerateSourcesAsync(x.GetRequiredValue<string>("--input"), x.GetRequiredValue<int>("--dotnet"), x.GetRequiredValue<string>("--freedesktop"), x.GetValue<string>("--temp"), x.GetValue<bool>("--self-contained"), x.GetValue<bool>("--run-as-user"));
-            await FlatpakSourcesGenerator.WriteSourcesFileAsync(sources, x.GetValue<string>("--output"));
+            var sources = await FlatpakSourcesGenerator.GenerateSourcesAsync(x.GetRequiredValue<string>("--input"), x.GetRequiredValue<int>("--dotnet"), x.GetRequiredValue<string>("--freedesktop"), x.GetValue<string>("--temp"), x.GetValue<bool>("--self-contained"), x.GetValue<bool>("--run-as-user"), x.GetValue<string>("--destination-name"));
+            if(sources.Count > 0)
+            {
+                await FlatpakSourcesGenerator.WriteSourcesFileAsync(sources, x.GetValue<string>("--output"));
+            }
         });
         rootCommand.Subcommands.Add(checkCommand);
         rootCommand.Subcommands.Add(generateCommand);
