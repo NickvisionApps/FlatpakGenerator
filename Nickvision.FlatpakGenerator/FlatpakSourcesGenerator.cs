@@ -155,7 +155,9 @@ public class FlatpakSourcesGenerator
                 "microsoft.aspnetcore.app.runtime.linux-x64",
                 "microsoft.netcore.app.runtime.linux-arm",
                 "microsoft.netcore.app.runtime.linux-arm64",
-                "microsoft.netcore.app.runtime.linux-x64"
+                "microsoft.netcore.app.runtime.linux-x64",
+                "runtime.linux-x64.Microsoft.DotNet.ILCompiler",
+                "runtime.linux-arm64.Microsoft.DotNet.ILCompiler"
             })
             {
                 var extraSource = await GetExtraSourceAsync(extra, destinationName);
