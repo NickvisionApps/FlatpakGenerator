@@ -156,10 +156,12 @@ public class FlatpakSourcesGenerator
                 "microsoft.netcore.app.runtime.linux-arm",
                 "microsoft.netcore.app.runtime.linux-arm64",
                 "microsoft.netcore.app.runtime.linux-x64",
-                "runtime.linux-x64.microsoft.dotnet.ilcompiler",
+                "runtime.linux-arm.microsoft.dotnet.ilcompiler",
                 "runtime.linux-arm64.microsoft.dotnet.ilcompiler",
-                "microsoft.netcore.app.runtime.nativeaot.linux-x64",
-                "microsoft.netcore.app.runtime.nativeaot.linux-arm64"
+                "runtime.linux-x64.microsoft.dotnet.ilcompiler",
+                "microsoft.netcore.app.runtime.nativeaot.linux-arm",
+                "microsoft.netcore.app.runtime.nativeaot.linux-arm64",
+                "microsoft.netcore.app.runtime.nativeaot.linux-x64"
             })
             {
                 var extraSource = await GetExtraSourceAsync(extra, destinationName);
@@ -205,7 +207,7 @@ public class FlatpakSourcesGenerator
             Console.Error.WriteLine($"[Error] Unable to find package: {name}");
             return null;
         }
-        var latestEntry = latestPage.Packages[^1].CatalogEntry;
+        var latestEntry = latestPage.CatalogEntry is null ? latestPage.Packages[^1].CatalogEntry : latestPage.CatalogEntry;
         latestEntry = await HttpClient.GetFromJsonAsync<NugetCatalogEntry>(latestEntry.Url, JsonSerializerOptions);
         if (latestEntry is null)
         {
