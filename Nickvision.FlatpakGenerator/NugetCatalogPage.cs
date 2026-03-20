@@ -10,13 +10,14 @@ public class NugetCatalogPage
     public List<NugetCatalogPackage> Packages { get; set; }
     [JsonPropertyName("@id")]
     public string Url { get; set; }
-    public NugetCatalogEntry? CatalogEntry { get; set; }
+    [JsonPropertyName("catalogEntry")]
+    public string? CatalogEntryUrl { get; set; }
 
     public NugetCatalogPage()
     {
         Url = string.Empty;
         Count = 0;
         Packages = [];
-        CatalogEntry = null;
+        CatalogEntryUrl = null;
     }
 }

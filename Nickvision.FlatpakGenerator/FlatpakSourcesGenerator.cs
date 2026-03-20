@@ -207,8 +207,7 @@ public class FlatpakSourcesGenerator
             Console.Error.WriteLine($"[Error] Unable to find package: {name}");
             return null;
         }
-        var latestEntry = latestPage.CatalogEntry is null ? latestPage.Packages[^1].CatalogEntry : latestPage.CatalogEntry;
-        latestEntry = await HttpClient.GetFromJsonAsync<NugetCatalogEntry>(latestEntry.Url, JsonSerializerOptions);
+        var latestEntry = await HttpClient.GetFromJsonAsync<NugetCatalogEntry>(latestPage.CatalogEntryUrl is null ? latestPage.Packages[^1].CatalogEntry.Url : latestPage.CatalogEntryUrl, JsonSerializerOptions);
         if (latestEntry is null)
         {
             Console.Error.WriteLine($"[Error] Unable to find package: {name}");
