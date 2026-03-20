@@ -200,15 +200,23 @@ public class FlatpakSourcesGenerator
             Console.Error.WriteLine($"[Error] Unable to find package: {name}");
             return null;
         }
-        var latestPage = catalog.Pages[^1];
-        latestPage = await HttpClient.GetFromJsonAsync<NugetCatalogPage>(latestPage.Url, JsonSerializerOptions);
-        if (latestPage is null || latestPage.Count == 0)
+        NugetCatalogEntry? latestEntry = null;
+        if (catalog.Pages[^1].Packages.Count > 0)
         {
-            Console.Error.WriteLine($"[Error] Unable to find package: {name}");
-            return null;
+            latestEntry = catalog.Pages[^1].Packages[^1].CatalogEntry;
         }
-        var latestEntry = await HttpClient.GetFromJsonAsync<NugetCatalogEntry>(latestPage.CatalogEntryUrl is null ? latestPage.Packages[^1].CatalogEntry.Url : latestPage.CatalogEntryUrl, JsonSerializerOptions);
-        if (latestEntry is null)
+        else
+        {
+            var latestPage = catalog.Pages[^1];
+            latestPage = await HttpClient.GetFromJsonAsync<NugetCatalogPage>(latestPage.Url, JsonSerializerOptions);
+            if (latestPage is null || latestPage.Count == 0)
+            {
+                Console.Error.WriteLine($"[Error] Unable to find package: {name}");
+                return null;
+            }
+            latestEntry = latestPage.Packages[^1].CatalogEntry;
+        }
+        latestEntry = await HttpClient.GetFromJsonAsync<NugetCatalogEntry>(latestEntry.Url, JsonSerializerOptions); if (latestEntry is null)
         {
             Console.Error.WriteLine($"[Error] Unable to find package: {name}");
             return null;
